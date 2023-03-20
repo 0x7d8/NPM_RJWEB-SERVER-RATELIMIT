@@ -1,0 +1,37 @@
+{
+  "name": "rjweb-server-ratelimit",
+  "version": "1.0.0",
+  "description": "Easy and Lightweight Way to add ratelimits to rjweb-server",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "scripts": {
+    "build": "rm -rf lib && tsc && esbuild `find src \\( -name '*.ts' -o -name '*.tsx' \\)` --platform='node' --ignore-annotations --format='cjs' --outdir='lib/cjs' && esbuild `find src \\( -name '*.ts' -o -name '*.tsx' \\)` --platform='node' --ignore-annotations --format='esm' --outdir='lib/esm' && cp -r lib/typings/* lib/cjs && cp -r lib/typings/* lib/esm && rm -rf lib/typings && cp package.json lib/cjs/pckg.json && cp package.json lib/esm/pckg.json",
+    "test": "yarn build && node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rotvproHD/NPM_RJWEB-SERVER-RATELIMIT.git"
+  },
+  "keywords": [
+    "webserver",
+    "rate",
+    "limit",
+    "lightweight",
+    "ratelimit"
+  ],
+  "author": "0x4096 (Robert Jansen)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rotvproHD/NPM_RJWEB-SERVER-RATELIMIT/issues"
+  },
+  "homepage": "https://github.com/rotvproHD/NPM_RJWEB-SERVER-RATELIMIT#readme",
+  "dependencies": {
+    "rjweb-server": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.0",
+    "esbuild": "^0.17.11",
+    "rjweb-server-ratelimit": "link:.",
+    "typescript": "^4.9.5"
+  }
+}
