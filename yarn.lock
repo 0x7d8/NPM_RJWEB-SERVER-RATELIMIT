@@ -113,9 +113,9 @@
   integrity sha512-JOOxw49BVZx2/5tW3FqkdjSD/5gXYeVGPDcB0lvap0gLQshkh1Nyel1QazC+wNxus3xPlsYAgqU1BUmrmCvWtw==
 
 "@types/node@^18.15.0":
-  version "18.15.3"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.15.3.tgz#f0b991c32cfc6a4e7f3399d6cb4b8cf9a0315014"
-  integrity sha512-p6ua9zBxz5otCmbpb5D3U4B5Nanw6Pk3PPyX05xnxbB/fRv71N7CPmORg7uAD5P70T0xmx1pzAx/FUfa5X+3cw==
+  version "18.15.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.15.5.tgz#3af577099a99c61479149b716183e70b5239324a"
+  integrity sha512-Ark2WDjjZO7GmvsyFFf81MXuGTA/d6oP38anyxWOL6EREyBKAxKoFHwBhaZxCfLRLpO8JgVXwqOwSwa7jRcjew==
 
 esbuild@^0.17.11:
   version "0.17.12"
@@ -150,11 +150,17 @@ esbuild@^0.17.11:
   uid ""
 
 rjweb-server@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/rjweb-server/-/rjweb-server-5.0.0.tgz#428f0b7a3a0c7f9011ba33aa421ec82e3c397fbf"
-  integrity sha512-40uPUjhfb13B+vd4Gja9EpQaUc2I4NfckcTX9CuzHOOQ5G1pbgQsmgHeBOUIqLYANG0dvP/mMm6Y85KlYGARew==
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/rjweb-server/-/rjweb-server-5.2.0.tgz#78faa6fc25eb14c76c62409d30005749308fd0f2"
+  integrity sha512-cw+ORK+teJO08elHIliMN8v4D8qgjFKfpOjtTWfNdGCmDQYIGMXykI58+TY5v3CC9HrJALkhyV2ZdN8dzcCdxQ==
+  dependencies:
+    uWebSockets.js uNetworking/uWebSockets.js#v20.19.0
 
 typescript@^4.9.5:
   version "4.9.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
+
+uWebSockets.js@uNetworking/uWebSockets.js#v20.19.0:
+  version "20.19.0"
+  resolved "https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/42c9c0d5d31f46ca4115dc75672b0037ec970f28"

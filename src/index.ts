@@ -58,14 +58,14 @@ export function Init(options: Options = { rules: [] }): Middleware {
 				const rule = rules[index]
 
 				if (!(ctr.client.ip in rule.clients)) rule.clients[ctr.client.ip] = { hits: 1, start: new Date(), end: new Date(Date.now() + rule.timeWindow) }
-				else if (rule.clients[ctr.client.ip].end.getTime() <= new Date().getTime()) rule.clients[ctr.client.ip] = { hits: 1, start: new Date(), end: new Date() }
-				else rule.clients[ctr.client.ip].hits++
+				else if (rule.clients[ctr.client.ip].end.getTime() <= Date.now()) rule.clients[ctr.client.ip] = { hits: 1, start: new Date(), end: new Date(Date.now() + rule.timeWindow) }
+				else if (rule.clients[ctr.client.ip].hits < rule.maxHits) rule.clients[ctr.client.ip].hits++
 
 				if (options.modernHeaders) ctr
-						.setHeader('RateLimit-Limit', rule.maxHits)
-						.setHeader('RateLimit-Remaining', rule.maxHits - rule.clients[ctr.client.ip].hits)
-						.setHeader('RateLimit-Reset', ((rule.clients[ctr.client.ip].end.getTime() - Date.now()) / 1000).toFixed(0))
-						.setHeader('RateLimit-Policy', `${rule.maxHits};w=${(rule.timeWindow / 1000).toFixed(0)}`)
+					.setHeader('RateLimit-Limit', rule.maxHits)
+					.setHeader('RateLimit-Remaining', rule.maxHits - rule.clients[ctr.client.ip].hits)
+					.setHeader('RateLimit-Reset', ((rule.clients[ctr.client.ip].end.getTime() - Date.now()) / 1000).toFixed(0))
+					.setHeader('RateLimit-Policy', `${rule.maxHits};w=${(rule.timeWindow / 1000).toFixed(0)}`)
 				if (options.legacyHeaders) ctr
 					.setHeader('X-RateLimit-Limit', rule.maxHits)
 					.setHeader('X-RateLimit-Remaining', rule.maxHits - rule.clients[ctr.client.ip].hits)
