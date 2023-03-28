@@ -38,21 +38,23 @@ declare module "rjweb-server" {
 Setting a RateLimit on a Path
 ```js
 const { Server } = require('rjweb-server')
-const ratelimit = require('rjweb-server-ratelimit').Init
+const ratelimit = require('rjweb-server-ratelimit')
 
 const server = new Server({
   port: 8000
 })
 
-server.middleware(ratelimit({
-  rules: [
-    {
-      path: '/api',
-      timeWindow: 30000,
-      maxHits: 5,
-      message: 'Over the limit!!'
-    }
-  ]
+server.middleware(ratelimit.init({
+  http: {
+    message: 'Over the limit!!',
+    rules: [
+      {
+        path: '/api',
+        timeWindow: 30000,
+        maxHits: 5
+      }
+    ]
+  }
 }))
 
 server.path('/api', (path) => path

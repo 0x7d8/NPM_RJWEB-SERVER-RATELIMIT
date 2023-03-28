@@ -1,6 +1,6 @@
 {
   "name": "rjweb-server-ratelimit",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Easy and Lightweight Way to add ratelimits to rjweb-server",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
