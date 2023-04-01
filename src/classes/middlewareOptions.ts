@@ -1,3 +1,5 @@
+import { Content } from "rjweb-server"
+
 export interface RateLimitRule {
 	/** The Paths to apply this Ratelimit to */ path: string | RegExp | (string | RegExp)[]
 	/** The Paths to ignore when Routing This Ratelimit */ ignore?: string | RegExp | (string | RegExp)[]
@@ -14,7 +16,7 @@ export interface Options {
 		/**
 		 * The Message that gets sent when the Ratelimit is exceeded
 		 * @default "Ratelimited"
-		*/ message?: any
+		*/ message?: Content
 	}
 
 	/** WebSocket Message Settings */ wsMessage?: {
@@ -29,7 +31,7 @@ export interface Options {
 		/**
 		 * The Message that gets sent when the Ratelimit is exceeded & action is set to message
 		 * @default "Ratelimited"
-		*/ message?: any
+		*/ message?: Content
 	}
 
 	/**

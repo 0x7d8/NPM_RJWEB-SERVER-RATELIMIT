@@ -1,4 +1,5 @@
 /// <reference types="node" />
+import { Content } from "rjweb-server";
 export interface RateLimitRule {
     /** The Paths to apply this Ratelimit to */ path: string | RegExp | (string | RegExp)[];
     /** The Paths to ignore when Routing This Ratelimit */ ignore?: string | RegExp | (string | RegExp)[];
@@ -14,7 +15,7 @@ export interface Options {
         /**
          * The Message that gets sent when the Ratelimit is exceeded
          * @default "Ratelimited"
-        */ message?: any;
+        */ message?: Content;
     };
     /** WebSocket Message Settings */ wsMessage?: {
         /**
@@ -28,7 +29,7 @@ export interface Options {
         /**
          * The Message that gets sent when the Ratelimit is exceeded & action is set to message
          * @default "Ratelimited"
-        */ message?: any;
+        */ message?: Content;
     };
     /**
      * Whether to add Modern Headers (RateLimit-*)
@@ -53,23 +54,27 @@ export default class MiddlewareOptions {
     getOptions(): {
         http: {
             rules: RateLimitRule[];
-            message: Required<any> | {
-                [x: string]: Required<any> | any | {
+            message: string | number | boolean | symbol | Required<Function> | Required<Map<any, any>> | Required<Set<any>> | Required<Buffer> | Content[] | {
+                [x: string]: Required<any> | {
+                    [x: string]: Required<any> | any | {
+                        [x: string]: Required<any> | any | any;
+                    };
+                } | {
                     [x: string]: Required<any> | any | any;
                 };
-            } | {
-                [x: string]: Required<any> | any | any;
             };
         };
         wsMessage: {
             rules: RateLimitRule[];
             action: "close" | "message" | "ignore";
-            message: Required<any> | {
-                [x: string]: Required<any> | any | {
+            message: string | number | boolean | symbol | Required<Function> | Required<Map<any, any>> | Required<Set<any>> | Required<Buffer> | Content[] | {
+                [x: string]: Required<any> | {
+                    [x: string]: Required<any> | any | {
+                        [x: string]: Required<any> | any | any;
+                    };
+                } | {
                     [x: string]: Required<any> | any | any;
                 };
-            } | {
-                [x: string]: Required<any> | any | any;
             };
         };
         modernHeaders: boolean;

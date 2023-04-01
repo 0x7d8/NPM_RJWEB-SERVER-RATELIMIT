@@ -37,6 +37,8 @@ const checkRule = (rule: RateLimitRule, ctr: HTTPRequestContextFull | WebSocketM
 	if (rule.ignore) if (Array.isArray(rule.ignore)) {
 		let doContinue = true
 		rule.ignore.forEach((ignore) => {
+			if (doContinue) return
+
 			if (isRegExp(ignore)) doContinue = !ignore.test(ctr.url.path)
 			else doContinue = !ctr.url.path.includes(pathParser(ignore))
 		})

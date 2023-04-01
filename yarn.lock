@@ -208,9 +208,9 @@ require-directory@^2.1.1:
   uid ""
 
 rjweb-server@^5.0.0:
-  version "5.9.0"
-  resolved "https://registry.yarnpkg.com/rjweb-server/-/rjweb-server-5.9.0.tgz#b6bfceb3853354cc598ef34e01046f0cf5197727"
-  integrity sha512-hrdqMjXqnlmVI6XvDwF6rkNolr/GcETyz6IEmWGttZifOGfg45HKC2nU2uCjte1zbCcSOzUmRWFP3dvnuKvgFA==
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/rjweb-server/-/rjweb-server-5.9.1.tgz#13d9ac13e8b7ef4432e27b1f421750f7cc77706a"
+  integrity sha512-KxLJM6PojSacebwWNUWHkxUwm7atQi4HoAZG+Zvy1+Xqb8lSjF78s7M2va+QCgbwYan6YybSQQT6riVsqnAf5g==
   dependencies:
     uWebSockets.js uNetworking/uWebSockets.js#v20.19.0
     yargs "^17.7.1"
