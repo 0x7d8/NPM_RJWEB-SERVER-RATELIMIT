@@ -1,6 +1,6 @@
 import { Options, DeepRequired } from "./classes/middlewareOptions";
 export interface RemainingRateLimit {
-    path: string;
+    path: string | RegExp | (string | RegExp)[];
     hits: number;
     max: number;
     resetIn: number;
@@ -34,5 +34,4 @@ export { init };
 export interface Props {
     /** Gets the Remaining Rate Limits of the Client */ getRateLimits: () => RemainingRateLimit[];
 }
-/** @ts-ignore */
-export { version as Version } from "./pckg.json";
+export declare const Version: string;

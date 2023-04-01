@@ -1,10 +1,13 @@
-import { HTTPRequestContext, MiddlewareBuilder, MiddlewareToProps, Status } from "rjweb-server"
+import { HTTPRequestContext, MiddlewareBuilder, MiddlewareToProps, Status, pathParser } from "rjweb-server"
+import { WebSocketMessage } from "rjweb-server/lib/cjs/types/webSocket"
+import { isRegExp } from "util/types"
+
 type HTTPRequestContextFull = HTTPRequestContext & MiddlewareToProps<[ Props ]>
 
-import MiddlewareOptions, { Options, DeepRequired } from "./classes/middlewareOptions"
+import MiddlewareOptions, { Options, DeepRequired, RateLimitRule } from "./classes/middlewareOptions"
 
 export interface RemainingRateLimit {
-	path: string
+	path: string | RegExp | (string | RegExp)[]
 	hits: number
 	max: number
 	resetIn: number
@@ -29,6 +32,40 @@ interface Context {
 	}
 }
 
+const checkRule = (rule: RateLimitRule, ctr: HTTPRequestContextFull | WebSocketMessage) => {
+	// Check Ignore
+	if (rule.ignore) if (Array.isArray(rule.ignore)) {
+		let doContinue = true
+		rule.ignore.forEach((ignore) => {
+			if (isRegExp(ignore)) doContinue = !ignore.test(ctr.url.path)
+			else doContinue = !ctr.url.path.includes(pathParser(ignore))
+		})
+
+		if (!doContinue) return false
+	} else {
+		let doContinue = true
+
+		if (isRegExp(rule.ignore)) doContinue = !rule.ignore.test(ctr.url.path)
+		else doContinue = !ctr.url.path.includes(pathParser(rule.ignore))
+
+		if (!doContinue) return false
+	}
+
+	// Check Path
+	if (Array.isArray(rule.path)) {
+		let returns = false
+		rule.path.forEach((path) => {
+			if (isRegExp(path)) returns = path.test(ctr.url.path)
+			else returns = ctr.url.path.includes(pathParser(path))
+		})
+
+		return returns
+	} else {
+		if (isRegExp(rule.path)) return rule.path.test(ctr.url.path)
+		else return ctr.url.path.includes(pathParser(rule.path))
+	}
+}
+
 const { init } = new MiddlewareBuilder<Options, Context>()
 	.init((lCtx, options = {}) => {
 		const fullOptions = new MiddlewareOptions(options).getOptions()
@@ -43,7 +80,7 @@ const { init } = new MiddlewareBuilder<Options, Context>()
 		}
 	})
 	.http((lCtx, stop, ctr: HTTPRequestContextFull) => {
-		const rules = lCtx.options.http.rules.filter((rule) => ctr.url.path.startsWith(rule.path))
+		const rules = lCtx.options.http.rules.filter((rule) => checkRule(rule, ctr))
 
 		let respond = -1
 		for (let index = 0; index < rules.length; index++) {
@@ -80,7 +117,7 @@ const { init } = new MiddlewareBuilder<Options, Context>()
 		}))
 	})
 	.wsMessage((lCtx, stop, ctr) => {
-		const rules = lCtx.options.wsMessage.rules.filter((rule) => ctr.url.path.startsWith(rule.path))
+		const rules = lCtx.options.wsMessage.rules.filter((rule) => checkRule(rule, ctr))
 
 		let respond = -1
 		for (let index = 0; index < rules.length; index++) {
@@ -118,4 +155,5 @@ export interface Props {
 }
 
 /** @ts-ignore */
-export { version as Version } from "./pckg.json"
+import { version } from "./pckg.json"
+export const Version: string = version

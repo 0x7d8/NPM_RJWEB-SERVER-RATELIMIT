@@ -1,5 +1,6 @@
 export interface RateLimitRule {
-	/** The Path to apply this Ratelimit to */ path: string
+	/** The Paths to apply this Ratelimit to */ path: string | RegExp | (string | RegExp)[]
+	/** The Paths to ignore when Routing This Ratelimit */ ignore?: string | RegExp | (string | RegExp)[]
 	/** The Time Window in which to keep hits */ timeWindow: number
 	/** The Maximum Hits allowed in the Time Window */ maxHits: number
 }
