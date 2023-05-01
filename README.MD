@@ -21,49 +21,39 @@ or
 pnpm add rjweb-server-ratelimit
 ```
 
-## Add Intellisense (Important for good developer experience!)
-```ts
-// webserver.d.ts
-
-import { MiddlewareToProps } from "rjweb-server"
-import { Props as AdditionalProps1 } from "rjweb-server-ratelimit"
-
-declare module "rjweb-server" {
-  export interface HTTPRequestContext extends MiddlewareToProps<[ AdditionalProps1 ]> {}
-}
-```
-
 ## Usage
 
 Setting a RateLimit on a Path
 ```js
 const { Server } = require('rjweb-server')
-const ratelimit = require('rjweb-server-ratelimit')
+const { rateLimit } = require('rjweb-server-ratelimit')
 
 const server = new Server({
   port: 8000
-})
-
-server.middleware(ratelimit.init({
-  http: {
-    message: 'Over the limit!!',
-    rules: [
-      {
-        path: '/api',
-        ignore: '/api/version',
-        timeWindow: 30000,
-        maxHits: 5
-      }
-    ]
-  }
-}))
+}, [
+  rateLimit.config({
+    http: {
+      message: 'Over the limit!!',
+      rules: [
+        {
+          path: '/api',
+          ignore: '/api/version',
+          timeWindow: 30000,
+          maxHits: 5
+        }
+      ]
+    }
+  })
+])
 
 server.path('/api', (path) => path
-  .http('GET', '/', (ctr) => {
-    const limit = ctr.getRateLimits()[0]
+  .http('GET', '/', (http) => http
+    .onRequest((ctr) => {
+      const limit = ctr.getRateLimits()[0]
 
-    ctr.print(`You have used ${limit.hits} / ${limit.max} of your limits, they will be reset in ${limit.resetIn}ms`)
-  })
+      ctr.print(`You have used ${limit.hits} / ${limit.max} of your limits, they will be reset in ${limit.resetIn}ms`)
+    })
+  )
 )
 
 server.start().then((res) => {
@@ -74,31 +64,33 @@ server.start().then((res) => {
 Using Regex
 ```js
 const { Server } = require('rjweb-server')
-const ratelimit = require('rjweb-server-ratelimit')
+const { rateLimit } = require('rjweb-server-ratelimit')
 
 const server = new Server({
   port: 8000
-})
-
-server.middleware(ratelimit.init({
-  http: {
-    message: 'Over the limit!!',
-    rules: [
-      {
-        path: /api|auth/g,
-        timeWindow: 30000,
-        maxHits: 5
-      }
-    ]
-  }
-}))
+}, [
+  rateLimit.config({
+    http: {
+      message: 'Over the limit!!',
+      rules: [
+        {
+          path: /api|auth/g,
+          timeWindow: 30000,
+          maxHits: 5
+        }
+      ]
+    }
+  })
+])
 
 server.path('/api', (path) => path
-  .http('GET', '/', (ctr) => {
-    const limit = ctr.getRateLimits()[0]
+  .http('GET', '/', (http) => http
+    .onRequest((ctr) => {
+      const limit = ctr.getRateLimits()[0]
 
-    ctr.print(`You have used ${limit.hits} / ${limit.max} of your limits, they will be reset in ${limit.resetIn}ms`)
-  })
+      ctr.print(`You have used ${limit.hits} / ${limit.max} of your limits, they will be reset in ${limit.resetIn}ms`)
+    })
+  )
 )
 
 server.start().then((res) => {
@@ -110,31 +102,33 @@ Match with Arrays
 ### Now if any of the paths in that array match it will apply the ratelimit
 ```js
 const { Server } = require('rjweb-server')
-const ratelimit = require('rjweb-server-ratelimit')
+const { rateLimit } = require('rjweb-server-ratelimit')
 
 const server = new Server({
   port: 8000
-})
-
-server.middleware(ratelimit.init({
-  http: {
-    message: 'Over the limit!!',
-    rules: [
-      {
-        path: [/api|auth/g, '/stats'],
-        timeWindow: 30000,
-        maxHits: 5
-      }
-    ]
-  }
-}))
+}, [
+  rateLimit.config({
+    http: {
+      message: 'Over the limit!!',
+      rules: [
+        {
+          path: [/api|auth/g, '/stats'],
+          timeWindow: 30000,
+          maxHits: 5
+        }
+      ]
+    }
+  })
+])
 
 server.path('/api', (path) => path
-  .http('GET', '/', (ctr) => {
-    const limit = ctr.getRateLimits()[0]
+  .http('GET', '/', (http) => http
+    .onRequest((ctr) => {
+      const limit = ctr.getRateLimits()[0]
 
-    ctr.print(`You have used ${limit.hits} / ${limit.max} of your limits, they will be reset in ${limit.resetIn}ms`)
-  })
+      ctr.print(`You have used ${limit.hits} / ${limit.max} of your limits, they will be reset in ${limit.resetIn}ms`)
+    })
+  )
 )
 
 server.start().then((res) => {

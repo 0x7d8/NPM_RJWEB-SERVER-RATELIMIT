@@ -1,8 +1,5 @@
-import { HTTPRequestContext, MiddlewareBuilder, MiddlewareToProps, Status, pathParser } from "rjweb-server"
-import { WebSocketMessage } from "rjweb-server/lib/cjs/types/webSocket"
+import { HttpRequest, MiddlewareBuilder, RequestContext, Status, WsMessage, parsePath } from "rjweb-server"
 import { isRegExp } from "util/types"
-
-type HTTPRequestContextFull = HTTPRequestContext & MiddlewareToProps<[ Props ]>
 
 import MiddlewareOptions, { Options, DeepRequired, RateLimitRule } from "./classes/middlewareOptions"
 
@@ -32,7 +29,7 @@ interface Context {
 	}
 }
 
-const checkRule = (rule: RateLimitRule, ctr: HTTPRequestContextFull | WebSocketMessage) => {
+const checkRule = (rule: RateLimitRule, ctr: RequestContext) => {
 	// Check Ignore
 	if (rule.ignore) if (Array.isArray(rule.ignore)) {
 		let doContinue = true
@@ -40,7 +37,7 @@ const checkRule = (rule: RateLimitRule, ctr: HTTPRequestContextFull | WebSocketM
 			if (doContinue) return
 
 			if (isRegExp(ignore)) doContinue = !ignore.test(ctr.url.path)
-			else doContinue = !ctr.url.path.includes(pathParser(ignore))
+			else doContinue = !ctr.url.path.includes(parsePath(ignore))
 		})
 
 		if (!doContinue) return false
@@ -48,7 +45,7 @@ const checkRule = (rule: RateLimitRule, ctr: HTTPRequestContextFull | WebSocketM
 		let doContinue = true
 
 		if (isRegExp(rule.ignore)) doContinue = !rule.ignore.test(ctr.url.path)
-		else doContinue = !ctr.url.path.includes(pathParser(rule.ignore))
+		else doContinue = !ctr.url.path.includes(parsePath(rule.ignore))
 
 		if (!doContinue) return false
 	}
@@ -58,17 +55,37 @@ const checkRule = (rule: RateLimitRule, ctr: HTTPRequestContextFull | WebSocketM
 		let returns = false
 		rule.path.forEach((path) => {
 			if (isRegExp(path)) returns = path.test(ctr.url.path)
-			else returns = ctr.url.path.includes(pathParser(path))
+			else returns = ctr.url.path.includes(parsePath(path))
 		})
 
 		return returns
 	} else {
 		if (isRegExp(rule.path)) return rule.path.test(ctr.url.path)
-		else return ctr.url.path.includes(pathParser(rule.path))
+		else return ctr.url.path.includes(parsePath(rule.path))
 	}
 }
 
-const { init } = new MiddlewareBuilder<Options, Context>()
+class Http extends HttpRequest {
+	/**
+	 * Gets the remaining ratelimits
+	 * @since 2.2.0
+	 * @from rjweb-server-ratelimit
+	*/ public getRateLimits(): RemainingRateLimit[] {
+		return undefined as any
+	}
+}
+
+class Ws extends WsMessage {
+	/**
+	 * Gets the remaining ratelimits
+	 * @since 2.2.0
+	 * @from rjweb-server-ratelimit
+	*/ public getRateLimits(): RemainingRateLimit[] {
+		return undefined as any
+	}
+}
+
+export const rateLimit = new MiddlewareBuilder<Options, Context>()
 	.init((lCtx, options = {}) => {
 		const fullOptions = new MiddlewareOptions(options).getOptions()
 
@@ -81,7 +98,9 @@ const { init } = new MiddlewareBuilder<Options, Context>()
 			}
 		}
 	})
-	.http((lCtx, stop, ctr: HTTPRequestContextFull) => {
+	.httpClass(() => Http)
+	.wsMessageClass(() => Ws)
+	.http((lCtx, stop, ctr) => {
 		const rules = lCtx.options.http.rules.filter((rule) => checkRule(rule, ctr))
 
 		let respond = -1
@@ -110,8 +129,8 @@ const { init } = new MiddlewareBuilder<Options, Context>()
 			ctr.status(Status.TOO_MANY_REQUESTS).print(lCtx.options.http.message)
 			stop()
 		}
-					
-		ctr.getRateLimits = () => rules.map((rule) => ({
+
+		(ctr as Http).getRateLimits = () => rules.map((rule) => ({
 			path: rule.path,
 			hits: lCtx.data.http.clients[rule.path + ctr.client.ip].hits,
 			max: rule.maxHits,
@@ -140,7 +159,7 @@ const { init } = new MiddlewareBuilder<Options, Context>()
 				}
 
 				case "close": {
-					ctr.close(lCtx.options.wsMessage.message)
+					ctr.close(Status.TOO_MANY_REQUESTS, lCtx.options.wsMessage.message)
 					break
 				}
 			}
@@ -149,12 +168,6 @@ const { init } = new MiddlewareBuilder<Options, Context>()
 		}
 	})
 	.build()
-
-export { init }
-
-export interface Props {
-	/** Gets the Remaining Rate Limits of the Client */ getRateLimits: () => RemainingRateLimit[]
-}
 
 /** @ts-ignore */
 import { version } from "./pckg.json"
