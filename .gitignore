@@ -11,3 +11,5 @@ jspm_packages/
 .eslintcache
 lib/
 test/
+docs/
+yarn.lock

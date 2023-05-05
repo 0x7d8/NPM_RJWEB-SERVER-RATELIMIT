@@ -1,7 +1,12 @@
 test/
 src/
-examples/
+docs/
+templates/
 .github/
 .editorconfig
 yarn.lock
+yarn-error.log
 tsconfig.json
+CHANGELOG.MD
+jest.config.js
+tests/
