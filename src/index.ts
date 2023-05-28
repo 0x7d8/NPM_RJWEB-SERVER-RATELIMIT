@@ -65,26 +65,6 @@ const checkRule = (rule: RateLimitRule, ctr: RequestContext) => {
 	}
 }
 
-class Http extends HttpRequest {
-	/**
-	 * Gets the remaining ratelimits
-	 * @since 2.2.0
-	 * @from rjweb-server-ratelimit
-	*/ public getRateLimits(): RemainingRateLimit[] {
-		return undefined as any
-	}
-}
-
-class Ws extends WsMessage {
-	/**
-	 * Gets the remaining ratelimits
-	 * @since 2.2.0
-	 * @from rjweb-server-ratelimit
-	*/ public getRateLimits(): RemainingRateLimit[] {
-		return undefined as any
-	}
-}
-
 export const rateLimit = new MiddlewareBuilder<Options, Context>()
 	.init((lCtx, options = {}) => {
 		const fullOptions = new MiddlewareOptions(options).getOptions()
@@ -98,8 +78,24 @@ export const rateLimit = new MiddlewareBuilder<Options, Context>()
 			}
 		}
 	})
-	.httpClass(() => Http)
-	.wsMessageClass(() => Ws)
+	.httpClass((e) => class Http extends e {
+		/**
+		 * Gets the remaining ratelimits
+		 * @since 2.2.0
+		 * @from rjweb-server-ratelimit
+		*/ public getRateLimits(): RemainingRateLimit[] {
+			return undefined as any
+		}
+	})
+	.wsMessageClass((e) => class Ws extends e {
+		/**
+		 * Gets the remaining ratelimits
+		 * @since 2.2.0
+		 * @from rjweb-server-ratelimit
+		*/ public getRateLimits(): RemainingRateLimit[] {
+			return undefined as any
+		}
+	})
 	.http((lCtx, stop, ctr) => {
 		const rules = lCtx.options.http.rules.filter((rule) => checkRule(rule, ctr))
 
@@ -111,16 +107,16 @@ export const rateLimit = new MiddlewareBuilder<Options, Context>()
 			else if (lCtx.data.http.clients[rule.path + ctr.client.ip].end.getTime() <= Date.now()) lCtx.data.http.clients[rule.path + ctr.client.ip] = { hits: 1, start: new Date(), end: new Date(Date.now() + rule.timeWindow) }
 			else if (lCtx.data.http.clients[rule.path + ctr.client.ip].hits < rule.maxHits) lCtx.data.http.clients[rule.path + ctr.client.ip].hits++
 
-			if (lCtx.options.modernHeaders) ctr
-				.setHeader('RateLimit-Limit', rule.maxHits)
-				.setHeader('RateLimit-Remaining', rule.maxHits - lCtx.data.http.clients[rule.path + ctr.client.ip].hits)
-				.setHeader('RateLimit-Reset', ((lCtx.data.http.clients[rule.path + ctr.client.ip].end.getTime() - Date.now()) / 1000).toFixed(0))
-				.setHeader('RateLimit-Policy', `${rule.maxHits};w=${(rule.timeWindow / 1000).toFixed(0)}`)
-			if (lCtx.options.legacyHeaders) ctr
-				.setHeader('X-RateLimit-Limit', rule.maxHits)
-				.setHeader('X-RateLimit-Remaining', rule.maxHits - lCtx.data.http.clients[rule.path + ctr.client.ip].hits)
-				.setHeader('X-RateLimit-Reset', ((lCtx.data.http.clients[rule.path + ctr.client.ip].end.getTime() - Date.now()) / 1000).toFixed(0))
-				.setHeader('X-RateLimit-Policy', `${rule.maxHits};w=${(rule.timeWindow / 1000).toFixed(0)}`)
+			if (lCtx.options.modernHeaders) ctr.headers
+				.set('RateLimit-Limit', rule.maxHits)
+				.set('RateLimit-Remaining', rule.maxHits - lCtx.data.http.clients[rule.path + ctr.client.ip].hits)
+				.set('RateLimit-Reset', ((lCtx.data.http.clients[rule.path + ctr.client.ip].end.getTime() - Date.now()) / 1000).toFixed(0))
+				.set('RateLimit-Policy', `${rule.maxHits};w=${(rule.timeWindow / 1000).toFixed(0)}`)
+			if (lCtx.options.legacyHeaders) ctr.headers
+				.set('X-RateLimit-Limit', rule.maxHits)
+				.set('X-RateLimit-Remaining', rule.maxHits - lCtx.data.http.clients[rule.path + ctr.client.ip].hits)
+				.set('X-RateLimit-Reset', ((lCtx.data.http.clients[rule.path + ctr.client.ip].end.getTime() - Date.now()) / 1000).toFixed(0))
+				.set('X-RateLimit-Policy', `${rule.maxHits};w=${(rule.timeWindow / 1000).toFixed(0)}`)
 
 			if (lCtx.data.http.clients[rule.path + ctr.client.ip].hits >= rule.maxHits) respond = index
 		}
@@ -130,7 +126,7 @@ export const rateLimit = new MiddlewareBuilder<Options, Context>()
 			stop()
 		}
 
-		(ctr as Http).getRateLimits = () => rules.map((rule) => ({
+		(ctr as any).getRateLimits = () => rules.map((rule) => ({
 			path: rule.path,
 			hits: lCtx.data.http.clients[rule.path + ctr.client.ip].hits,
 			max: rule.maxHits,

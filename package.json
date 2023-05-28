@@ -1,6 +1,6 @@
 {
   "name": "rjweb-server-ratelimit",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Easy and Lightweight Way to add ratelimits to rjweb-server",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
@@ -28,7 +28,7 @@
   "homepage": "https://github.com/rotvproHD/NPM_RJWEB-SERVER-RATELIMIT#readme",
   "dependencies": {
     "rjbuild-typescript": "^1.1.1",
-    "rjweb-server": "^7.0.0"
+    "rjweb-server": "^8.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.15.0",
